@@ -1,12 +1,15 @@
 #include <cstdio>
+#include <iostream>
+#include <cstring>
 #include "stdlib.h"
 #include <cmath>
 #include <time.h>
+#include <limits.h>
 #include <list>
 #include <algorithm>
 #include <vector>
-#include <iostream>
-#include <cstring>
+#include <thread>
+#include <mutex>
 #include <vector>
 #include <stack>
 #include <exception>
@@ -18,12 +21,21 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include "assert.h"
+#include "ComplexList.h"
 #include <deque>
 #include <queue>
+#include <fstream>
+#include <Array.h>
+#include <set>
+#include <functional>
+#include "StringUtil.h"
+
+
 //#include <Queue.h>
 
 
 using namespace std;
+std::mutex mutex;
 
 //
 //int K, N, D;
@@ -2670,52 +2682,2817 @@ using namespace std;
 //    Test1();
 //    return 0;
 //}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void FindPath(BinaryTreeNode* pRoot, int expectedSum, std::vector<int>& path, int currentSum);
-void FindPath(BinaryTreeNode* pRoot, int expectedSum){
-    if(pRoot == nullptr)
-        return;
-    std::vector<int> path;
-    int currentSum = 0;
-    FindPath(pRoot, expectedSum, path, currentSum);
+///////////////////////////////////////查找二叉树中指定数值的路径/////////////////////////////////////////////////////////////////////////////////
+//void FindPath(BinaryTreeNode* pRoot, int expectedSum, std::vector<int>& path, int currentSum);
+//void FindPath(BinaryTreeNode* pRoot, int expectedSum){
+//    if(pRoot == nullptr)
+//        return;
+//    std::vector<int> path;
+//    int currentSum = 0;
+//    FindPath(pRoot, expectedSum, path, currentSum);
+//}
+//void FindPath(BinaryTreeNode* pRoot,int expectedSum, std::vector<int>& path, int currentSum){
+//    currentSum += pRoot->m_nValue;
+//    path.push_back(pRoot->m_nValue);
+//    bool isLeaf = pRoot->m_pLeft == nullptr && pRoot->m_pRight == nullptr;
+//    if(currentSum == expectedSum && isLeaf){
+//        cout << "A Path is found" << endl;
+//        std::vector<int>::iterator iter = path.begin();
+//        for(; iter != path.end(); ++ iter)
+//            cout << *iter << " ";
+//        cout << endl;
+//    }
+//    if(pRoot->m_pLeft != nullptr)
+//        FindPath(pRoot->m_pLeft, expectedSum, path, currentSum);
+//    if(pRoot->m_pRight != nullptr)
+//        FindPath(pRoot->m_pRight, expectedSum, path, currentSum);
+//    path.pop_back();
+//}
+//void Test(char* testName, BinaryTreeNode* pRoot, int expectedSum)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins:\n", testName);
+//
+//    FindPath(pRoot, expectedSum);
+//
+//    printf("\n");
+//}
+//
+////            10
+////         /      \
+////        5        12
+////       /\
+////      4  7
+//void Test1()
+//{
+//    BinaryTreeNode* pNode10 = CreateBinaryTreeNode(10);
+//    BinaryTreeNode* pNode5 = CreateBinaryTreeNode(5);
+//    BinaryTreeNode* pNode12 = CreateBinaryTreeNode(12);
+//    BinaryTreeNode* pNode4 = CreateBinaryTreeNode(4);
+//    BinaryTreeNode* pNode7 = CreateBinaryTreeNode(7);
+//
+//    ConnectTreeNodes(pNode10, pNode5, pNode12);
+//    ConnectTreeNodes(pNode5, pNode4, pNode7);
+//
+//    printf("Two paths should be found in Test1.\n");
+//    Test("Test1", pNode10, 22);
+//
+//    DestroyTree(pNode10);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//void CloneNodes(ComplexListNode* pHead){
+//    ComplexListNode* pNode = pHead;
+//    while(pNode != nullptr){
+//        ComplexListNode* pCloned = new ComplexListNode();
+//        pCloned->m_nValue = pNode->m_nValue;
+//        pCloned->m_pNext = pNode->m_pNext;
+//        pCloned->m_pSibling = nullptr;
+//
+//        pNode->m_pNext = pCloned;
+//        pNode = pCloned->m_pNext;//这一步是将节点向下移动一步
+//
+//    }
+//}
+//void ConnectSiblingNodes(ComplexListNode* pHead){
+//    ComplexListNode* pNode = pHead;
+//    while(pNode != nullptr){
+//        ComplexListNode* pClone = pNode->m_pNext;
+//        if(pNode->m_pSibling != nullptr){
+//            pClone->m_pSibling = pNode->m_pSibling->m_pNext;
+//        }
+//        pNode = pClone->m_pNext;
+//    }
+//}
+//ComplexListNode* ReconnectNodes(ComplexListNode* pHead){
+//    ComplexListNode* pNode = pHead;
+//    ComplexListNode* pClonedHead = nullptr;
+//    ComplexListNode* pClonedNode = nullptr;
+//
+//    if(pNode != nullptr){
+//        pClonedHead = pClonedNode = pNode->m_pNext;
+//        pNode->m_pNext = pClonedNode->m_pNext;
+//        pNode = pNode->m_pNext;
+//    }
+//    while (pNode != nullptr){
+//        pClonedNode->m_pNext = pNode->m_pNext;
+//        pClonedNode = pClonedNode->m_pNext;
+//        pNode->m_pNext = pClonedNode->m_pNext;
+//        pNode = pNode->m_pNext;
+//    }
+//    return pClonedHead;
+//}
+//ComplexListNode* Clone(ComplexListNode* pHead){
+//    CloneNodes(pHead);
+//    ConnectSiblingNodes(pHead);
+//    return ReconnectNodes(pHead);
+//}
+//void Test(const char* testName, ComplexListNode* pHead)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins:\n", testName);
+//
+//    printf("The original list is:\n");
+//    PrintList(pHead);
+//
+//    ComplexListNode* pClonedHead = Clone(pHead);
+//
+//    printf("The cloned list is:\n");
+//    PrintList(pClonedHead);
+//}
+//
+////          -----------------
+////         \|/              |
+////  1-------2-------3-------4-------5
+////  |       |      /|\             /|\
+////  --------+--------               |
+////          -------------------------
+//void Test1()
+//{
+//    ComplexListNode* pNode1 = CreateNode(1);
+//    ComplexListNode* pNode2 = CreateNode(2);
+//    ComplexListNode* pNode3 = CreateNode(3);
+//    ComplexListNode* pNode4 = CreateNode(4);
+//    ComplexListNode* pNode5 = CreateNode(5);
+//
+//    BuildNodes(pNode1, pNode2, pNode3);
+//    BuildNodes(pNode2, pNode3, pNode5);
+//    BuildNodes(pNode3, pNode4, nullptr);
+//    BuildNodes(pNode4, pNode5, pNode2);
+//
+//    Test("Test1", pNode1);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+////////////////////////////////////将二叉树转换成双向链表/////////////////////////////////////////////////////////////////////////////////////
+//void ConvertNode(BinaryTreeNode* pNode, BinaryTreeNode** pLastNodeInLast);
+//BinaryTreeNode* Convert(BinaryTreeNode* pRootOfTree){
+//    BinaryTreeNode* pLastNodeInList = nullptr;
+//    ConvertNode(pRootOfTree, &pLastNodeInList);
+//    BinaryTreeNode* pHeadOfList = pLastNodeInList;
+//    while(pHeadOfList != nullptr && pHeadOfList->m_pLeft != nullptr && pHeadOfList->m_pParent != nullptr)
+//        pHeadOfList = pHeadOfList->m_pLeft;
+//    return pHeadOfList;
+//}
+//void ConvertNode(BinaryTreeNode* pNode, BinaryTreeNode** pLastNodeInLast){
+//    if(pNode == nullptr)
+//        return;;
+//    BinaryTreeNode* pCurrent = pNode;
+//    if(pCurrent->m_pLeft != nullptr)
+//        ConvertNode(pCurrent->m_pLeft, pLastNodeInLast);
+//    pCurrent->m_pLeft = *pLastNodeInLast;
+//    if(*pLastNodeInLast != nullptr)
+//        (*pLastNodeInLast)->m_pRight = pCurrent;
+//    *pLastNodeInLast = pCurrent;
+//    if(pCurrent->m_pRight != nullptr)
+//        ConvertNode(pCurrent->m_pRight, pLastNodeInLast);
+//}
+//void PrintDoubleLinkedList(BinaryTreeNode* pHeadOfList)
+//{
+//    BinaryTreeNode* pNode = pHeadOfList;
+//
+//    printf("The nodes from left to right are:\n");
+//    while(pNode != nullptr)
+//    {
+//        printf("%d\t", pNode->m_nValue);
+//
+//        if(pNode->m_pRight == nullptr)
+//            break;
+//        pNode = pNode->m_pRight;
+//    }
+//
+//    printf("\nThe nodes from right to left are:\n");
+//    while(pNode != nullptr)
+//    {
+//        printf("%d\t", pNode->m_nValue);
+//
+//        if(pNode->m_pLeft == nullptr)
+//            break;
+//        pNode = pNode->m_pLeft;
+//    }
+//
+//    printf("\n");
+//}
+//
+//void DestroyList(BinaryTreeNode* pHeadOfList)
+//{
+//    BinaryTreeNode* pNode = pHeadOfList;
+//    while(pNode != nullptr)
+//    {
+//        BinaryTreeNode* pNext = pNode->m_pRight;
+//
+//        delete pNode;
+//        pNode = pNext;
+//    }
+//}
+//
+//void Test(char* testName, BinaryTreeNode* pRootOfTree)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins:\n", testName);
+//
+//    PrintTree(pRootOfTree);
+//
+//    BinaryTreeNode* pHeadOfList = Convert(pRootOfTree);
+//
+//    PrintDoubleLinkedList(pHeadOfList);
+//}
+//void Test1()
+//{
+//    BinaryTreeNode* pNode10 = CreateBinaryTreeNode(10);
+//    BinaryTreeNode* pNode6 = CreateBinaryTreeNode(6);
+//    BinaryTreeNode* pNode14 = CreateBinaryTreeNode(14);
+//    BinaryTreeNode* pNode4 = CreateBinaryTreeNode(4);
+//    BinaryTreeNode* pNode8 = CreateBinaryTreeNode(8);
+//    BinaryTreeNode* pNode12 = CreateBinaryTreeNode(12);
+//    BinaryTreeNode* pNode16 = CreateBinaryTreeNode(16);
+//
+//    ConnectTreeNodes(pNode10, pNode6, pNode14);
+//    ConnectTreeNodes(pNode6, pNode4, pNode8);
+//    ConnectTreeNodes(pNode14, pNode12, pNode16);
+//
+//    Test("Test1", pNode10);
+//
+//    DestroyList(pNode4);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+///////////////////////////////////序列化二叉树/////////////////////////////////////////////////////////////////////////////////////
+//void Serialize(const BinaryTreeNode* pRoot, ostream& stream){
+//    if(pRoot == nullptr){
+//        stream << "$, ";
+//        return;
+//    }
+//    stream << pRoot->m_nValue <<',';
+//    Serialize(pRoot->m_pLeft, stream);
+//    Serialize(pRoot->m_pRight, stream);
+//}
+//
+//bool ReadStream(istream& stream, int* number)
+//{
+//    if(stream.eof())
+//        return false;
+//
+//    char buffer[32];
+//    buffer[0] = '\0';
+//
+//    char ch;
+//    stream >> ch;
+//    int i = 0;
+//    while(!stream.eof() && ch != ',')
+//    {
+//        buffer[i++] = ch;
+//        stream >> ch;
+//    }
+//
+//    bool isNumeric = false;
+//    if(i > 0 && buffer[0] != '$')
+//    {
+//        *number = atoi(buffer);
+//        isNumeric = true;
+//    }
+//
+//    return isNumeric;
+//}
+//
+//
+//void Deserialize(BinaryTreeNode** pRoot, istream& stream){
+//    int number;
+//    if(ReadStream(stream, &number)){
+//        *pRoot = new BinaryTreeNode();
+//        (*pRoot)->m_nValue = number;
+//        (*pRoot)->m_pLeft = nullptr;
+//        (*pRoot)->m_pRight = nullptr;
+//
+//        Deserialize(&((*pRoot)->m_pLeft), stream);
+//        Deserialize(&((*pRoot)->m_pRight), stream);
+//    }
+//}
+//bool isSameTree(const BinaryTreeNode* pRoot1, const BinaryTreeNode* pRoot2)
+//{
+//    if(pRoot1 == nullptr && pRoot2 == nullptr)
+//        return true;
+//
+//    if(pRoot1 == nullptr || pRoot2 == nullptr)
+//        return false;
+//
+//    if(pRoot1->m_nValue != pRoot2->m_nValue)
+//        return false;
+//
+//    return isSameTree(pRoot1->m_pLeft, pRoot2->m_pLeft) &&
+//           isSameTree(pRoot1->m_pRight, pRoot2->m_pRight);
+//}
+//
+//void Test(const char* testName, const BinaryTreeNode* pRoot)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: \n", testName);
+//
+//    PrintTree(pRoot);
+//
+//    char* fileName = "test.txt";
+//    ofstream fileOut;
+//    fileOut.open(fileName);
+//
+//    Serialize(pRoot, fileOut);
+//    fileOut.close();
+//
+//    // print the serialized file
+//    ifstream fileIn1;
+//    char ch;
+//    fileIn1.open(fileName);
+//    while(!fileIn1.eof())
+//    {
+//        fileIn1 >> ch;
+//        cout << ch;
+//    }
+//    fileIn1.close();
+//    cout << endl;
+//
+//    ifstream fileIn2;
+//    fileIn2.open(fileName);
+//    BinaryTreeNode* pNewRoot = nullptr;
+//    Deserialize(&pNewRoot, fileIn2);
+//    fileIn2.close();
+//
+//    PrintTree(pNewRoot);
+//
+//    if(isSameTree(pRoot, pNewRoot))
+//        printf("The deserialized tree is same as the oritinal tree.\n\n");
+//    else
+//        printf("The deserialized tree is NOT same as the oritinal tree.\n\n");
+//
+//    DestroyTree(pNewRoot);
+//}
+//
+//void Test1()
+//{
+//    BinaryTreeNode* pNode8 = CreateBinaryTreeNode(8);
+//    BinaryTreeNode* pNode6 = CreateBinaryTreeNode(6);
+//    BinaryTreeNode* pNode10 = CreateBinaryTreeNode(10);
+//    BinaryTreeNode* pNode5 = CreateBinaryTreeNode(5);
+//    BinaryTreeNode* pNode7 = CreateBinaryTreeNode(7);
+//    BinaryTreeNode* pNode9 = CreateBinaryTreeNode(9);
+//    BinaryTreeNode* pNode11 = CreateBinaryTreeNode(11);
+//
+//    ConnectTreeNodes(pNode8, pNode6, pNode10);
+//    ConnectTreeNodes(pNode6, pNode5, pNode7);
+//    ConnectTreeNodes(pNode10, pNode9, pNode11);
+//
+//    Test("Test1", pNode8);
+//
+//    DestroyTree(pNode8);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    return 0;
+//}
+////////////////////////////////////////字符串的排列////////////////////////////////////////////////////////////////////////////////
+//void Permutation(char* pStr, char* pBegin);
+//void Permutation(char* pStr){
+//    if(pStr == nullptr)
+//        return;
+//    Permutation(pStr,pStr);
+//}
+//void Permutation(char* pStr, char* pBegin){
+//    if(*pBegin == '\0'){
+//        printf("%s\n",pStr);
+//    }
+//    else{
+//        for(char* pCh = pBegin; *pCh != '\0'; ++pCh){
+//            char temp = *pCh;
+//            *pCh = *pBegin;
+//            *pBegin = temp;
+//
+//            Permutation(pStr,pBegin + 1);
+//
+//             temp = *pCh;
+//            *pCh = *pBegin;
+//            *pBegin = temp;
+//        }
+//    }
+//}
+//void Test(char* pStr)
+//{
+//    if(pStr == nullptr)
+//        printf("Test for nullptr begins:\n");
+//    else
+//        printf("Test for %s begins:\n", pStr);
+//
+//    Permutation(pStr);
+//
+//    printf("\n");
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test(nullptr);
+//
+//    char string1[] = "";
+//    Test(string1);
+//
+//    char string2[] = "a";
+//    Test(string2);
+//
+//    char string3[] = "ab";
+//    Test(string3);
+//
+//    char string4[] = "abc";
+//    Test(string4);
+//
+//    return 0;
+//}
+///////////////////////////////////////////数组中数显次数超过一半的数字/////////////////////////////////////////////////////////////////////////////
+//bool g_bInputInvalid = false;
+//
+//bool CheckInvalidArray(int* numbers, int length)
+//{
+//    g_bInputInvalid = false;
+//    if(numbers == nullptr && length <= 0)
+//        g_bInputInvalid = true;
+//
+//    return g_bInputInvalid;
+//}
+//
+//bool CheckMoreThanHalf(int* numbers, int length, int number)
+//{
+//    int times = 0;
+//    for(int i = 0; i < length; ++i)
+//    {
+//        if(numbers[i] == number)
+//            times++;
+//    }
+//
+//    bool isMoreThanHalf = true;
+//    if(times * 2 <= length)
+//    {
+//        g_bInputInvalid = true;
+//        isMoreThanHalf = false;
+//    }
+//
+//    return isMoreThanHalf;
+//}
+//int MoreThanHalfNum_Solution1(int* numbers, int length)
+//{
+//    if(CheckInvalidArray(numbers, length))
+//        return 0;
+//
+//    int middle = length >> 1;
+//    int start = 0;
+//    int end = length - 1;
+//    int index = Partition(numbers, length, start, end);
+//    while(index != middle)
+//    {
+//        if(index > middle)
+//        {
+//            end = index - 1;
+//            index = Partition(numbers, length, start, end);
+//        }
+//        else
+//        {
+//            start = index + 1;
+//            index = Partition(numbers, length, start, end);
+//        }
+//    }
+//
+//    int result = numbers[middle];
+//    if(!CheckMoreThanHalf(numbers, length, result))
+//        result = 0;
+//
+//    return result;
+//}
+//void Test(char* testName, int* numbers, int length, int expectedValue, bool expectedFlag)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: \n", testName);
+//
+//    int* copy = new int[length];
+//    for(int i = 0; i < length; ++i)
+//        copy[i] = numbers[i];
+//
+//    printf("Test for solution1: ");
+//    int result = MoreThanHalfNum_Solution1(numbers, length);
+//    if(result == expectedValue && g_bInputInvalid == expectedFlag)
+//        printf("Passed.\n");
+//    else
+//        printf("Failed.\n");
+//
+//    delete[] copy;
+//}
+//
+//void Test1()
+//{
+//    int numbers[] = {1, 2, 3, 2, 2, 2, 5, 4, 2};
+//    Test("Test1", numbers, sizeof(numbers) / sizeof(int), 2, false);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+/////////////////////////////////////找到数组中出现次数超过一半的数字/////////////////////////////////////////////////////////////////////////////////
+//int MoreThanHalfNum(int* numbers, int length){
+//    if(CheckInvalidArray(numbers, length))
+//        return 0;
+//    int result = numbers[0];
+//    int times = 1;
+//    for(int i = 1; i < length; ++i){
+//        if(times == 0){
+//            result = numbers[i];
+//            times = 1;
+//        }
+//        else if(numbers[i] == result)
+//            times++;
+//        else
+//            times--;
+//    }
+//    if(!CheckMoreThanHalf(numbers, length, result))
+//        result = 0;
+//    return result;
+//}
+/////////////////////////////////////找出数组中最小的k个数///////////////////////////////////////////////////////////////////////
+//void GetLeastNumbers(int* input, int n, int* output, int k){
+//    if(input == nullptr || output == nullptr || k > n || n <= 0 || k <= 0)
+//        return;
+//    int start = 0;
+//    int end = n - 1;
+//    int index = Partition(input, n, start, end);
+//    while(index != k - 1){
+//        if(index > k -1){
+//            end = index - 1;
+//            index = Partition(input, n , start, end);
+//        }
+//        else{
+//            start = index + 1;
+//            index = Partition(input, n, start, end);
+//        }
+//    }
+//    for(int i = 0; i < k; ++ i)
+//        output[i] = input[i];
+//}
+//void Test(char* testName, int* data, int n, int* expectedResult, int k)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: \n", testName);
+//
+//    vector<int> vectorData;
+//    for(int i = 0; i < n; ++ i)
+//        vectorData.push_back(data[i]);
+//
+//    if(expectedResult == nullptr)
+//        printf("The input is invalid, we don't expect any result.\n");
+//    else
+//    {
+//        printf("Expected result: \n");
+//        for(int i = 0; i < k; ++ i)
+//            printf("%d\t", expectedResult[i]);
+//        printf("\n");
+//    }
+//
+//    printf("Result for solution1:\n");
+//    int* output = new int[k];
+//    GetLeastNumbers(data, n, output, k);
+//    if(expectedResult != nullptr)
+//    {
+//        for(int i = 0; i < k; ++ i)
+//            printf("%d\t", output[i]);
+//        printf("\n");
+//    }
+//
+//    delete[] output;
+//
+//}
+//void Test1()
+//{
+//    int data[] = {4, 5, 1, 6, 2, 7, 3, 8};
+//    int expected[] = {1, 2, 3, 4};
+//    Test("Test1", data, sizeof(data) / sizeof(int), expected, sizeof(expected) / sizeof(int));
+//}
+//
+//void Test2()
+//{
+//    int data[] = {4, 5, 1, 6, 2, 7, 3, 8};
+//    int expected[] = {1, 2, 3, 4, 5, 6, 7, 8};
+//    Test("Test2", data, sizeof(data) / sizeof(int), expected, sizeof(expected) / sizeof(int));
+//}
+//
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    Test1();
+//
+//    return 0;
+//}
+////////////////////////////////////////////////////找到数组中最小的k个数//////////////////////////////////////////////////////////////////////
+//typedef multiset<int, greater<int>> intSet;
+//typedef multiset<int, greater<int>>::iterator setIterator;
+//
+//void GetLeastNumbers(const vector<int>& data, intSet& leastNumbers, int k){
+//    leastNumbers.clear();
+//    if(k < 1 || data.size() < k)
+//        return;
+//    vector<int>::const_iterator iter = data.begin();
+//    for(; iter != data.end(); ++ iter){
+//        if(leastNumbers.size() < k)
+//            leastNumbers.insert(*iter);
+//        else{
+//            setIterator iterGreatest = leastNumbers.begin();
+//            if(*iter < *(leastNumbers.begin())){
+//                leastNumbers.erase(iterGreatest);
+//                leastNumbers.insert(*iter);
+//            }
+//        }
+//
+//    }
+//}
+////////////////////////////////////////////////找出数组中的中位数//////////////////////////////////////////////////////////////////////////
+//template <typename T> class DynamicArray{
+//public:
+//    void Insert(T num){
+//        if(((min.size() + max.size()) & 1 ) == 0){
+//            if(max.size() > 0 && num < max[0]){
+//                max.push_back(num);
+//                push_heap(max.begin(), max.end(), less<T>());
+//
+//                num = max[0];
+//                pop_heap(max.begin(), max.end(), less<T>());
+//                max.pop_back();
+//            }
+//            min.push_back(num);
+//            push_heap(min.begin(), min.end(), greater<T>());
+//        }
+//        else{
+//            if(min.size() > 0 && min[0] < num){
+//                min.push_back(num);
+//                push_heap(min.begin(), min.end(), greater<T>());
+//                num = min[0];
+//                pop_heap(min.begin(), min.end(), greater<T>());
+//                min.pop_back();
+//            }
+//            max.push_back(num);
+//            push_heap(max.begin(), max.end(), less<T>());
+//        }
+//    }
+//    T GetMedian(){
+//        int size = min.size() + max.size();
+//        if(size == 0)
+//            cout << "No numbers are available" << endl;
+//
+//        T median = 0;
+//        if((size & 1) == 1)
+//            median = min[0];
+//        else
+//            median = (min[0] + max[0]) / 2;
+//        return median;
+//    }
+//
+//private:
+//    vector<T> min;
+//    vector<T> max;
+//};
+//void Test(char* testName, DynamicArray<double>& numbers, double expected)
+//
+//{
+//if(testName != nullptr)
+//printf("%s begins: ", testName);
+//
+//if(abs(numbers.GetMedian() - expected) < 0.0000001)
+//printf("Passed.\n");
+//else
+//printf("FAILED.\n");
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    DynamicArray<double> numbers;
+//
+//    printf("Test1 begins: ");
+//    try
+//    {
+//        numbers.GetMedian();
+//        printf("FAILED.\n");
+//    }
+//    catch(const exception&)
+//    {
+//        printf("Passed.\n");
+//    }
+//
+//    numbers.Insert(5);
+//    Test("Test2", numbers, 5);
+//
+//    numbers.Insert(2);
+//    Test("Test3", numbers, 3.5);
+//
+//    numbers.Insert(3);
+//    Test("Test4", numbers, 3);
+//
+//    numbers.Insert(4);
+//    Test("Test6", numbers, 3.5);
+//
+//    numbers.Insert(1);
+//    Test("Test5", numbers, 3);
+//
+//    numbers.Insert(6);
+//    Test("Test7", numbers, 3.5);
+//
+//    numbers.Insert(7);
+//    Test("Test8", numbers, 4);
+//
+//    numbers.Insert(0);
+//    Test("Test9", numbers, 3.5);
+//
+//    numbers.Insert(8);
+//    Test("Test10", numbers, 4);
+//
+//    return 0;
+//}
+////////////////////////////////////////////找到数组中和最大的子数组/////////////////////////////////////////////////////////////////////////////////
+//bool g_InvalidInput = false;
+//int FindGreatestSumOfSubArray(int* pData, int nLength){
+//    if(pData == nullptr || nLength <= 0){
+//        g_InvalidInput = true;
+//        return 0;
+//    }
+//    g_InvalidInput = false;
+//
+//    int nCurSum = 0;
+//    int nGreatestSum = 0x80000000;
+//    for(int i = 0; i < nLength; ++i){
+//        if(nCurSum <= 0)
+//            nCurSum = pData[i];
+//        else
+//            nCurSum += pData[i];
+//        if(nCurSum > nGreatestSum)
+//            nGreatestSum = nCurSum;
+//    }
+//    return nGreatestSum;
+//}
+//void Test(char* testName, int* pData, int nLength, int expected, bool expectedFlag)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: \n", testName);
+//
+//    int result = FindGreatestSumOfSubArray(pData, nLength);
+//    if(result == expected && expectedFlag == g_InvalidInput)
+//        printf("Passed.\n");
+//    else
+//        printf("Failed.\n");
+//}
+//
+//// 1, -2, 3, 10, -4, 7, 2, -5
+//void Test1()
+//{
+//    int data[] = {1, -2, 3, 10, -4, 7, 2, -5};
+//    Test("Test1", data, sizeof(data) / sizeof(int), 18, false);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+/////////////////////////////////////////////查找第n位的数字是多少/////////////////////////////////////////////////////////////////////////////////
+//int beginNumber(int digits){
+//    if(digits == 1)
+//        return 0;
+//    else
+//        return (int) std::pow(10, digits - 1);
+//}
+//int countOfIntergers(int digits){
+//    if(digits == 1)
+//        return 10;
+//    int count = (int) std::pow(10, digits -1);
+//    return  9 * count;
+//}
+//int digitAtIndex(int index, int digits){
+//    int number = beginNumber(digits) + index / digits;
+//    int indexFrontRight = digits - index % digits;
+//    for(int i = 1; i < indexFrontRight; ++i)
+//        number /= 10;
+//    return number % 10;
+//
+//}
+//int digitAtIndex(int index){
+//    if(index < 0)
+//        return -1;
+//    int digits = 1;
+//    while(true){
+//        int numbers = countOfIntergers(digits);
+//        if(index < numbers * digits)
+//            return digitAtIndex(index, digits);
+//        index -= digits * numbers;
+//        digits ++;
+//    }
+//    return -1;
+//}
+//
+//
+//void test(const char* testName, int inputIndex, int expectedOutput)
+//{
+//    if(digitAtIndex(inputIndex) == expectedOutput)
+//        cout << testName << " passed." << endl;
+//    else
+//        cout << testName << " FAILED." << endl;
+//}
+//
+//
+//int main()
+//{
+//    test("Test1", 0, 0);
+//    test("Test2", 1, 1);
+//    test("Test3", 9, 9);
+//    test("Test4", 10, 1);
+//    test("Test5", 189, 9);
+//    test("Test6", 190, 1);
+//    test("Test7", 1000, 3);
+//    test("Test8", 1001, 7);
+//    test("Test9", 1002, 0);
+//    return 0;
+//}
+////////////////////////////////////////////拼接出所有数字最小的一个数字是多少/////////////////////////////////////////////////////////////////////////////
+//const int g_MaxNumberLength = 10;
+//char* g_StrCombine1 = new char[g_MaxNumberLength * 2 + 1];
+//char* g_StrCombine2 = new char[g_MaxNumberLength * 2 + 1];
+//int compare(const void* strNumber1, const void* strNumber2);
+//void PrintMinNumber(int* numbers, int length){
+//    if(numbers == nullptr || length < 0)
+//        return;
+//    char** strNumbers = (char**)(new int[length]);
+//    for(int i = 0; i < length; ++ i){
+//        strNumbers[i] = new char[g_MaxNumberLength + 1];
+//        sprintf(strNumbers[i], "%d", numbers[i]);
+//    }
+//    qsort(strNumbers, length, sizeof(char*), compare);
+//    for(int i = 0; i < length; ++ i)
+//        printf("%s", strNumbers[i]);
+//    printf("\n");
+//    for(int i = 0; i < length; ++ i)
+//        delete[] strNumbers[i];
+//    delete[] strNumbers;
+//}
+//int compare(const void* strNumber1, const void* strNumber2){
+//    strcpy(g_StrCombine1, *(const char**)strNumber1);
+//    strcat(g_StrCombine1,*(const char**)strNumber2);
+//
+//    strcpy(g_StrCombine2, *(const char**)strNumber2);
+//    strcat(g_StrCombine2, *(const char**)strNumber1);
+//
+//    return strcmp(g_StrCombine1, g_StrCombine2);
+//}
+//void Test(const char* testName, int* numbers, int length, const char* expectedResult)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins:\n", testName);
+//
+//    if(expectedResult != nullptr)
+//        printf("Expected result is: \t%s\n", expectedResult);
+//
+//    printf("Actual result is: \t");
+//    PrintMinNumber(numbers, length);
+//
+//    printf("\n");
+//}
+//
+//void Test1()
+//{
+//    int numbers[] = {3, 5, 1, 4, 2};
+//    Test("Test1", numbers, sizeof(numbers)/sizeof(int), "12345");
+//}
+//
+//void Test2()
+//{
+//    int numbers[] = {3, 32, 321};
+//    Test("Test2", numbers, sizeof(numbers)/sizeof(int), "321323");
+//}
+//
+//void Test3()
+//{
+//    int numbers[] = {3, 323, 32123};
+//    Test("Test3", numbers, sizeof(numbers)/sizeof(int), "321233233");
+//}
+//
+//void Test4()
+//{
+//    int numbers[] = {1, 11, 111};
+//    Test("Test4", numbers, sizeof(numbers)/sizeof(int), "111111");
+//}
+//
+//// Êý×éÖÐÖ»ÓÐÒ»¸öÊý×Ö
+//void Test5()
+//{
+//    int numbers[] = {321};
+//    Test("Test5", numbers, sizeof(numbers)/sizeof(int), "321");
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    Test2();
+//    Test3();
+//    Test4();
+//    Test5();
+//
+//    return 0;
+//}
+//
+/////////////////////////////////把数字转换成字母////////////////////////////////////////////////////////////////////
+//int GetTranslationCount(const string& number);
+//int GetTranslationCount(int number){
+//    if(number < 0)
+//        return 0;
+//    string numberInString = to_string(number);
+//    return GetTranslationCount(numberInString);
+//}
+//int GetTranslationCount(const string& number){
+//    int length = number.length();
+//    int* counts = new int[length];
+//    int count = 0;
+//    for(int i = length - 1; i >= 0; -- i){
+//        count = 0;
+//        if(i < length - 1)
+//            count = counts[i + 1];
+//        else
+//            count = 1;
+//        if(i < length - 1){
+//            int digit1 = number[i] - '0';
+//            int digit2 = number[i + 1] - '0';
+//            int converted = digit1 * 10 + digit2;
+//            if(converted >= 10 && converted <= 25){
+//                if(i < length - 2)
+//                    count += counts[i + 2];
+//                else
+//                    count += 1;
+//            }
+//        }
+//        counts[i] = count;
+//    }
+//    count = counts[0];
+//    delete[] counts;
+//
+//    return count;
+//}
+//void Test(const string& testName, int number, int expected)
+//{
+//    if(GetTranslationCount(number) == expected)
+//        cout << testName << " passed." << endl;
+//    else
+//        cout << testName << " FAILED." << endl;
+//}
+//
+//void Test1()
+//{
+//    int number = 0;
+//    int expected = 1;
+//    Test("Test1", number, expected);
+//}
+//
+//void Test2()
+//{
+//    int number = 10;
+//    int expected = 2;
+//    Test("Test2", number, expected);
+//}
+//
+//void Test3()
+//{
+//    int number = 125;
+//    int expected = 3;
+//    Test("Test3", number, expected);
+//}
+//
+//void Test4()
+//{
+//    int number = 126;
+//    int expected = 2;
+//    Test("Test4", number, expected);
+//}
+//
+//void Test5()
+//{
+//    int number = 426;
+//    int expected = 1;
+//    Test("Test5", number, expected);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    Test2();
+//    Test3();
+//    Test4();
+//    Test5();
+//
+//    return 0;
+//}
+///////////////////////////////////////在矩阵中找到礼物的最大值/////////////////////////////////////////////////////////////////////////////////
+//int getMaxValue_solution(const int* values, int rows, int cols){
+//    if(values == nullptr || rows <= 0 || cols <= 0)
+//        return 0;
+//    int** maxValues = new int*[rows];
+//    for(int i = 0; i < rows; ++ i)
+//        maxValues[i] = new int[cols];
+//    for(int i = 0; i < rows; ++ i){
+//        for(int j = 0; j < cols; ++ j){
+//            int left = 0;
+//            int up = 0;
+//            if(i > 0)
+//                up = maxValues[i - 1][j];
+//            if(j > 0)
+//                left = maxValues[i][j - 1];
+//            maxValues[i][j] = std::max(left, up) + values[i * cols + j];
+//        }
+//    }
+//    int maxValue = maxValues[rows - 1][cols - 1];
+//    for(int i = 0; i < rows; ++ i)
+//        delete[] maxValues[i];
+//    delete[] maxValues;
+//
+//    return maxValue;
+//}
+//void test(const char* testName, const int* values, int rows, int cols, int expected)
+//{
+//    if(getMaxValue_solution(values, rows, cols) == expected)
+//        std::cout << testName << ": solution1 passed." << std::endl;
+//    else
+//        std::cout << testName << ": solution1 FAILED." << std::endl;
+//
+//
+//}
+//
+//void test1()
+//{
+//
+//    int values[][3] = {
+//            { 1, 2, 3 },
+//            { 4, 5, 6 },
+//            { 7, 8, 9 }
+//    };
+//    int expected = 29;
+//    test("test1", (const int*) values, 3, 3, expected);
+//}
+//
+//void test2()
+//{
+//
+//    int values[][4] = {
+//            { 1, 10, 3, 8 },
+//            { 12, 2, 9, 6 },
+//            { 5, 7, 4, 11 },
+//            { 3, 7, 16, 5 }
+//    };
+//    int expected = 53;
+//    test("test2", (const int*) values, 4, 4, expected);
+//}
+//int main(int argc, char* argv[])
+//{
+//    test1();
+//    test2();
+//
+//    return 0;
+//}
+///////////////////////////////////////////////////最长不含重复字符的字符串////////////////////////////////////////////////
+//int longestSubstringWithoutDuplication(const std::string& str){
+//    int curLength = 0;
+//    int maxLength = 0;
+//
+//    int* position = new int[26];
+//    for(int i = 0; i < 26; ++ i)
+//        position[i] = -1;
+//    for(int i = 0; i < str.length(); ++ i){
+//        int prevIndex = position[str[i] - 'a'];
+//        if(prevIndex < 0 || i - prevIndex > curLength)
+//            ++ curLength;
+//        else{
+//            if(curLength > maxLength)
+//                maxLength = curLength;
+//            curLength = i - prevIndex;
+//        }
+//        position[str[i] - 'a'] = i;
+//
+//    }
+//    if(curLength > maxLength)
+//        maxLength = curLength;
+//    delete[] position;
+//    return maxLength;
+//
+//}
+//void testSolution1(const std::string& input, int expected)
+//{
+//    int output = longestSubstringWithoutDuplication(input);
+//    if(output == expected)
+//        std::cout << "Solution 1 passed, with input: " << input << std::endl;
+//    else
+//        std::cout << "Solution 1 FAILED, with input: " << input << std::endl;
+//}
+//
+//void test(const std::string& input, int expected)
+//{
+//    testSolution1(input, expected);
+//}
+//
+//void test1()
+//{
+//    const std::string input = "abcacfrar";
+//    int expected = 4;
+//    test(input, expected);
+//}
+//
+//void test2()
+//{
+//    const std::string input = "acfrarabc";
+//    int expected = 4;
+//    test(input, expected);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    test1();
+//    test2();
+//
+//    return 0;
+//}
+//////////////////////////////查找第n个丑数////////////////////////////////////////////////////////////////////////////////////////
+//bool IsUgly(int number){
+//    while(number % 2 == 0)
+//        number /= 2;
+//    while(number % 3 == 0)
+//        number /= 3;
+//    while(number % 5 == 0)
+//        number /= 5;
+//    return (number == 1) ? true : false;
+//}
+//int GetUglyNumber(int index){
+//    if(index <= 0)
+//        return 0;
+//    int number = 0;
+//    int uglyFound = 0;
+//    while(uglyFound < index){
+//        ++ number;
+//        if(IsUgly(number)){
+//            ++ uglyFound;
+//        }
+//    }
+//    return number;
+//}
+//void Test(int index, int expected)
+//{
+//    if(GetUglyNumber(index) == expected)
+//        printf("solution1 passed\n");
+//    else
+//        printf("solution1 failed\n");
+//
+//
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test(1, 1);
+//
+//    Test(2, 2);
+//    Test(3, 3);
+//    Test(4, 4);
+//    Test(5, 5);
+//    Test(6, 6);
+//    Test(7, 8);
+//    Test(8, 9);
+//    Test(9, 10);
+//    Test(10, 12);
+//    Test(11, 15);
+//
+//    Test(1500, 859963392);
+//
+//    Test(0, 0);
+//
+//    return 0;
+//}
+/////////////////////////////////第一个只出现一次的字符////////////////////////////////////////////////////////////////////////////////////////
+//char FistNotRepeatingChar(char* pString){
+//    if(pString == nullptr)
+//        return '\0';
+//    const int tableSize = 256;
+//    unsigned int hashTable[tableSize];
+//    for(unsigned int i = 0; i < tableSize; ++ i)
+//        hashTable[i] = 0;
+//    char* pHashKey = pString;
+//    while(*(pHashKey) != '\0')
+//        hashTable[*(pHashKey++)]++;
+//    pHashKey = pString;
+//    while(*pHashKey != '\0'){
+//        if(hashTable[*pHashKey] == 1)
+//            return *pHashKey;
+//        pHashKey ++;
+//    }
+//    return '\0';
+//}
+//
+//void Test(char* pString, char expected)
+//{
+//    if(FistNotRepeatingChar(pString) == expected)
+//        printf("Test passed.\n");
+//    else
+//        printf("Test failed.\n");
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//
+//    Test("google", 'l');
+//
+//
+//    Test("aabccdbd", '\0');
+//
+//
+//    Test("abcdefg", 'a');
+//
+//
+//    Test(nullptr, '\0');
+//
+//    return 0;
+//}
+//////////////////////////////////////////////查看数组中有多少个逆序对//////////////////////////////////////////////////////////////////////
+//int InversePairsCore(int* data, int* copy, int start, int end);
+//int InversePairs(int* data, int length){
+//    if(data == nullptr || length < 0)
+//        return 0;
+//    int* copy = new int[length];
+//    for(int i = 0; i < length; ++ i)
+//        copy[i] = data[i];
+//    int count = InversePairsCore(data, copy, 0, length - 1);
+//    delete[] copy;
+//    return count;
+//
+//}
+//
+//int InversePairsCore(int* data, int* copy, int start, int end){
+//    if(start == end){
+//        copy[start] = data[start];
+//        return 0;
+//    }
+//    int length = (end - start) / 2;
+//
+//    int left = InversePairsCore(copy, data, start, start + length);
+//    int right = InversePairsCore(copy, data, start + length + 1, end);
+//
+//    int i = start + length;
+//    int j = end;
+//    int indexCopy = end;
+//    int count = 0;
+//    while(i >= start && j >= start + length + 1){
+//        if(data[i] > data[j]){
+//            copy[indexCopy --] = data[i --];
+//            count += j - start - length;
+//
+//        }
+//        else{
+//            copy[indexCopy --] = data[j --];
+//        }
+//    }
+//    for(; i >= start; -- i)
+//        copy[indexCopy --] = data[i];
+//    for(; j >= start + length + 1; -- j)
+//        copy[indexCopy --] = data[j];
+//    return left + right + count;
+//}
+//void Test(char* testName, int* data, int length, int expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    if(InversePairs(data, length) == expected)
+//        printf("Passed.\n");
+//    else
+//        printf("Failed.\n");
+//}
+//
+//void Test1()
+//{
+//    int data[] = { 1, 2, 3, 4, 7, 6, 5 };
+//    int expected = 3;
+//
+//    Test("Test1", data, sizeof(data) / sizeof(int), expected);
+//}
+//
+//
+//void Test2()
+//{
+//    int data[] = { 6, 5, 4, 3, 2, 1 };
+//    int expected = 15;
+//
+//    Test("Test2", data, sizeof(data) / sizeof(int), expected);
+//}
+//
+//
+//void Test3()
+//{
+//    int data[] = { 1, 2, 3, 4, 5, 6 };
+//    int expected = 0;
+//
+//    Test("Test3", data, sizeof(data) / sizeof(int), expected);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    Test2();
+//    Test3();
+//
+//    return 0;
+//}
+//////////////////////////////////////////找出两个链表的公共节点//////////////////////////////////////////////////////////////////////
+//unsigned int GetListLength(ListNode* pHead){
+//    unsigned int nLength = 0;
+//    ListNode* pNode = pHead;
+//    while(pNode != nullptr){
+//        ++ nLength;
+//        pNode = pNode -> m_pNext;
+//    }
+//    return nLength;
+//};
+//ListNode* FindFistCommonNode(ListNode* pHead1, ListNode* pHead2){
+//    unsigned  int nLength1 = GetListLength(pHead1);
+//    unsigned  int nLength2 = GetListLength(pHead2);
+//    int nLengehDif = nLength1 - nLength2;
+//    ListNode* pListHeadLong = pHead1;
+//    ListNode* pListHeadShort = pHead2;
+//    if(nLength2 > nLength1){
+//        pListHeadLong = pHead2;
+//        pListHeadShort = pHead1;
+//        nLengehDif = nLength2 - nLength1;
+//    }
+//    for(int i = 0; i < nLengehDif; ++ i)
+//        pListHeadLong = pListHeadLong->m_pNext;
+//    while((pListHeadLong != nullptr) && (pListHeadShort != nullptr) && pListHeadLong != pListHeadShort){
+//        pListHeadLong = pListHeadLong->m_pNext;
+//        pListHeadShort = pListHeadShort->m_pNext;
+//    }
+//    ListNode* pFirstCommonNode = pListHeadLong;
+//
+//    return pFirstCommonNode;
+//}
+//
+//void DestroyNode(ListNode* pNode);
+//
+//void Test(char* testName, ListNode* pHead1, ListNode* pHead2, ListNode* pExpected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    ListNode* pResult = FindFistCommonNode(pHead1, pHead2);
+//    if(pResult == pExpected)
+//        printf("Passed.\n");
+//    else
+//        printf("Failed.\n");
+//}
+//
+//// 1 - 2 - 3 \
+////            6 - 7
+////     4 - 5 /
+//void Test1()
+//{
+//    ListNode* pNode1 = CreateListNode(1);
+//    ListNode* pNode2 = CreateListNode(2);
+//    ListNode* pNode3 = CreateListNode(3);
+//    ListNode* pNode4 = CreateListNode(4);
+//    ListNode* pNode5 = CreateListNode(5);
+//    ListNode* pNode6 = CreateListNode(6);
+//    ListNode* pNode7 = CreateListNode(7);
+//
+//    ConnectListNodes(pNode1, pNode2);
+//    ConnectListNodes(pNode2, pNode3);
+//    ConnectListNodes(pNode3, pNode6);
+//    ConnectListNodes(pNode4, pNode5);
+//    ConnectListNodes(pNode5, pNode6);
+//    ConnectListNodes(pNode6, pNode7);
+//
+//    Test("Test1", pNode1, pNode4, pNode6);
+//
+//    DestroyNode(pNode1);
+//    DestroyNode(pNode2);
+//    DestroyNode(pNode3);
+//    DestroyNode(pNode4);
+//    DestroyNode(pNode5);
+//    DestroyNode(pNode6);
+//    DestroyNode(pNode7);
+//}
+//
+//void DestroyNode(ListNode* pNode)
+//{
+//    delete pNode;
+//    pNode = nullptr;
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+//////////////////////////////////////统计一个数字在排序数组中出现的次数///////////////////////////////////////////////////////////////////////////////
+//int GetFirstK(int* data, int length, int k, int start, int end){
+//    if(start > end)
+//        return -1;
+//    int middleIndex = (start + end) / 2;
+//    int middleData = data[middleIndex];
+//    if(middleData == k){
+//        if(middleIndex > 0 && data[middleIndex - 1] != k || middleIndex == 0)
+//            return middleIndex;
+//        else
+//            end = middleIndex - 1;
+//    }
+//    else if(middleData > k)
+//        end = middleIndex - 1;
+//    else
+//        start = middleIndex + 1;
+//    return GetFirstK(data, length, k, start, end);
+//}
+//
+//int GetLastK(int* data, int length, int k, int start, int end){
+//    if(start > end)
+//        return -1;
+//    int middleIndex = (start + end) / 2;
+//    int middleData = data[middleIndex];
+//    if(middleData == k){
+//        if((middleIndex < length - 1 && data[middleIndex + 1] != k )|| middleIndex == length - 1)
+//            return middleIndex;
+//        else
+//            start = middleIndex + 1;
+//    }
+//    else if(middleData < k)
+//        start = middleIndex + 1;
+//    else
+//        end = middleIndex - 1;
+//    return GetLastK(data, length, k, start, end);
+//}
+//
+//
+//int GetNumberOfK(int* data, int length, int k){
+//    int number = 0;
+//    if(data != nullptr && length > 0){
+//        int first = GetFirstK(data, length, k, 0, length - 1);
+//        int last = GetLastK(data, length, k, 0, length - 1);
+//        if(first > -1 && last > -1)
+//            number = last - first + 1;
+//    }
+//    return number;
+//}
+//void Test(const char* testName, int data[], int length, int k, int expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    int result = GetNumberOfK(data, length, k);
+//    if(result == expected)
+//        printf("Passed.\n");
+//    else
+//        printf("Failed.\n");
+//}
+//
+//void Test1()
+//{
+//    int data[] = {1, 2, 3, 3, 3, 3, 4, 5};
+//    Test("Test1", data, sizeof(data) / sizeof(int), 3, 4);
+//}
+//
+//void Test2()
+//{
+//    int data[] = {3, 3, 3, 3, 4, 5};
+//    Test("Test2", data, sizeof(data) / sizeof(int), 3, 4);
+//}
+//
+//void Test3()
+//{
+//    int data[] = {1, 2, 3, 3, 3, 3};
+//    Test("Test3", data, sizeof(data) / sizeof(int), 3, 4);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    Test2();
+//    Test3();
+//
+//    return 0;
+//}
+////////////////////////////////////////////找出字符串中第k大节点/////////////////////////////////////////////////////////////////////////
+//BinaryTreeNode* KthNodeCore(BinaryTreeNode* pRoot, unsigned int& k);
+//BinaryTreeNode* KthNode(BinaryTreeNode* pRoot, unsigned int k){
+//    if(pRoot == nullptr || k == 0)
+//        return nullptr;
+//    return KthNodeCore(pRoot, k);
+//}
+//BinaryTreeNode* KthNodeCore(BinaryTreeNode* pRoot, unsigned int& k){
+//    BinaryTreeNode* target = nullptr;
+//    if(pRoot->m_pLeft != nullptr)
+//        target = KthNodeCore(pRoot->m_pLeft, k);
+//    if(target == nullptr){
+//        if(k == 1)
+//            target = pRoot;
+//
+//        k --;
+//    }
+//    if(target == nullptr && pRoot->m_pRight != nullptr)
+//        target = KthNodeCore(pRoot->m_pRight, k);
+//    return target;
+//}
+//void Test(const char* testName,  BinaryTreeNode* pRoot, unsigned int k, bool isNull, int expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    const BinaryTreeNode* pTarget = KthNode(pRoot, k);
+//    if((isNull && pTarget == nullptr) || (!isNull && pTarget->m_nValue == expected))
+//        printf("Passed.\n");
+//    else
+//        printf("FAILED.\n");
+//}
+//
+//
+//void TestA()
+//{
+//    BinaryTreeNode* pNode8 = CreateBinaryTreeNode(8);
+//    BinaryTreeNode* pNode6 = CreateBinaryTreeNode(6);
+//    BinaryTreeNode* pNode10 = CreateBinaryTreeNode(10);
+//    BinaryTreeNode* pNode5 = CreateBinaryTreeNode(5);
+//    BinaryTreeNode* pNode7 = CreateBinaryTreeNode(7);
+//    BinaryTreeNode* pNode9 = CreateBinaryTreeNode(9);
+//    BinaryTreeNode* pNode11 = CreateBinaryTreeNode(11);
+//
+//    ConnectTreeNodes(pNode8, pNode6, pNode10);
+//    ConnectTreeNodes(pNode6, pNode5, pNode7);
+//    ConnectTreeNodes(pNode10, pNode9, pNode11);
+//
+//    Test("TestA0", pNode8, 0, true, -1);
+//    Test("TestA1", pNode8, 1, false, 5);
+//    Test("TestA2", pNode8, 2, false, 6);
+//    Test("TestA3", pNode8, 3, false, 7);
+//    Test("TestA4", pNode8, 4, false, 8);
+//    Test("TestA5", pNode8, 5, false, 9);
+//    Test("TestA6", pNode8, 6, false, 10);
+//    Test("TestA7", pNode8, 7, false, 11);
+//    Test("TestA8", pNode8, 8, true, -1);
+//
+//    DestroyTree(pNode8);
+//
+//    printf("\n\n");
+//}
+//int main(int argc, char* argv[])
+//{
+//    TestA();
+//
+//}
+///////////////////////////////////////////第一次面试/////////////////////////////////////////////////////////////////////////////
+//int solveBugNeedTime() {
+//    int N, A, X;
+//    stdin >> N ;
+//    stdin >> A ;
+//    stdin >> X;
+//    int ti[N];
+//    for (int i = 0; i < N; i++) {
+//       std::cin >> ti[i];
+//        //std::cout << std::endl;
+//
+//    }
+//    int needSmallTime = 0;
+//    if (X == 8) {
+//        for (int i = 0; i < N; i++) {
+//            needSmallTime += ti[i] / A;
+//        }
+//        if (needSmallTime < 480)
+//            return needSmallTime;
+//        else
+//            return 0;
+//    } else {
+//        for (int i = 0; X - i > 0; i++) {
+//            needSmallTime += ti[i] / A;
+////            if(ti[i] / A > 60){
+////
+////                needSmallTime += (ti[i] - ti[i] / A + ti[i + 1]) / A;
+////                i ++;
+////            }
+//        }
+//        for(int i = X; i < N; i ++){
+//            needSmallTime += ti[i];
+//        }
+//        if (needSmallTime < 480)
+//            return needSmallTime;
+//        else
+//            return 0;
+//    }
+//}
+//
+//int main(){
+//    int totalTime = solveBugNeedTime();
+//    std::cout << totalTime ;
+//
+//    return 0;
+//}
+/////////////////////////////////////////1000阶乘0的个数1/////////////////////////////////////////////////////////////////
+//int main()
+//{
+//    long total;
+//    long Integer;
+//    long i;
+//    scanf("%ld", &total);
+//    long count = 0;
+//    int flag = 0;
+//    for (i = 5; i <= total; i++)
+//    {
+//        Integer = i;
+//        flag = Integer % 5;
+//        while(flag==0)
+//        {
+//            Integer = Integer / 5;
+//            flag = Integer % 5;
+//            count = count + 1;
+//        }
+//
+//    }
+//    printf("%ld\n", count);
+//    return 0;
+//}
+/////////////////////////////////////二叉搜索树的第K大节点///////////////////////////////////////////////////////////////////////////////
+//const BinaryTreeNode* KthNodeCore(const BinaryTreeNode* pRoot, unsigned int& k);
+//
+//const BinaryTreeNode* KthNode(const BinaryTreeNode* pRoot, unsigned int k)
+//{
+//    if(pRoot == nullptr || k == 0)
+//        return nullptr;
+//
+//    return KthNodeCore(pRoot, k);
+//}
+//
+//const BinaryTreeNode* KthNodeCore(const BinaryTreeNode* pRoot, unsigned int& k)
+//{
+//    const BinaryTreeNode* target = nullptr;
+//
+//    if(pRoot->m_pLeft != nullptr)
+//        target = KthNodeCore(pRoot->m_pLeft, k);
+//
+//    if(target == nullptr)
+//    {
+//        if(k == 1)
+//            target = pRoot;
+//
+//        k--;
+//    }
+//
+//    if(target == nullptr && pRoot->m_pRight != nullptr)
+//        target = KthNodeCore(pRoot->m_pRight, k);
+//
+//    return target;
+//}
+//
+//
+//void Test(const char* testName, const BinaryTreeNode* pRoot, unsigned int k, bool isNull, int expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//    const BinaryTreeNode* pTarget = KthNode(pRoot, k);
+//    if((isNull && pTarget == nullptr) || (!isNull && pTarget->m_nValue == expected))
+//        printf("Passed.\n");
+//    else
+//        printf("FAILED.\n");
+//}
+//
+////            8
+////        6      10
+////       5 7    9  11
+//void TestA()
+//{
+//    BinaryTreeNode* pNode8 = CreateBinaryTreeNode(8);
+//    BinaryTreeNode* pNode6 = CreateBinaryTreeNode(6);
+//    BinaryTreeNode* pNode10 = CreateBinaryTreeNode(10);
+//    BinaryTreeNode* pNode5 = CreateBinaryTreeNode(5);
+//    BinaryTreeNode* pNode7 = CreateBinaryTreeNode(7);
+//    BinaryTreeNode* pNode9 = CreateBinaryTreeNode(9);
+//    BinaryTreeNode* pNode11 = CreateBinaryTreeNode(11);
+//
+//    ConnectTreeNodes(pNode8, pNode6, pNode10);
+//    ConnectTreeNodes(pNode6, pNode5, pNode7);
+//    ConnectTreeNodes(pNode10, pNode9, pNode11);
+//
+//    Test("TestA0", pNode8, 0, true, -1);
+//    Test("TestA1", pNode8, 1, false, 5);
+//    Test("TestA2", pNode8, 2, false, 6);
+//    Test("TestA3", pNode8, 3, false, 7);
+//    Test("TestA4", pNode8, 4, false, 8);
+//    Test("TestA5", pNode8, 5, false, 9);
+//    Test("TestA6", pNode8, 6, false, 10);
+//    Test("TestA7", pNode8, 7, false, 11);
+//    Test("TestA8", pNode8, 8, true, -1);
+//
+//    DestroyTree(pNode8);
+//
+//    printf("\n\n");
+//}
+//int main(int argc, char* argv[])
+//{
+//    TestA();
+//
+//}
+///////////////////////////////////////如何查找二叉树的深度////////////////////////////////////////////////////////////////////////
+//int TreeDepth(const BinaryTreeNode* pRoot)
+//{
+//    if(pRoot == nullptr)
+//        return 0;
+//
+//    int nLeft = TreeDepth(pRoot->m_pLeft);
+//    // cout << nLeft << endl;
+//    int nRight = TreeDepth(pRoot->m_pRight);
+//
+//    return (nLeft > nRight) ? (nLeft + 1) : (nRight + 1);
+//}
+//
+//void Test(const char* testName, const BinaryTreeNode* pRoot, int expected)
+//{
+//    int result = TreeDepth(pRoot);
+//    if(expected == result)
+//        printf("%s passed.\n", testName);
+//    else
+//        printf("%s FAILED.\n", testName);
+//}
+//void Test1()
+//{
+//    BinaryTreeNode* pNode1 = CreateBinaryTreeNode(1);
+//    BinaryTreeNode* pNode2 = CreateBinaryTreeNode(2);
+//    BinaryTreeNode* pNode3 = CreateBinaryTreeNode(3);
+//    BinaryTreeNode* pNode4 = CreateBinaryTreeNode(4);
+//    BinaryTreeNode* pNode5 = CreateBinaryTreeNode(5);
+//    BinaryTreeNode* pNode6 = CreateBinaryTreeNode(6);
+//    BinaryTreeNode* pNode7 = CreateBinaryTreeNode(7);
+//
+//    ConnectTreeNodes(pNode1, pNode2, pNode3);
+//    ConnectTreeNodes(pNode2, pNode4, pNode5);
+//    ConnectTreeNodes(pNode3, nullptr, pNode6);
+//    ConnectTreeNodes(pNode5, pNode7, nullptr);
+//
+//    Test("Test1", pNode1, 4);
+//
+//    DestroyTree(pNode1);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+/////////////////////////////////////////判断一颗二叉树是不是平衡二叉树///////////////////////////////////////////////////////////////////////
+//int TreeDepth(const BinaryTreeNode* pRoot)
+//{
+//    if(pRoot == nullptr)
+//        return 0;
+//
+//    int nLeft = TreeDepth(pRoot->m_pLeft);
+//    int nRight = TreeDepth(pRoot->m_pRight);
+//
+//    return (nLeft > nRight) ? (nLeft + 1) : (nRight + 1);
+//}
+//
+//bool IsBalanced_Solution1(const BinaryTreeNode* pRoot)
+//{
+//    if(pRoot == nullptr)
+//        return true;
+//
+//    int left = TreeDepth(pRoot->m_pLeft);
+//    int right = TreeDepth(pRoot->m_pRight);
+//    int diff = left - right;
+//    if(diff > 1 || diff < -1)
+//        return false;
+//
+//    return IsBalanced_Solution1(pRoot->m_pLeft)
+//           && IsBalanced_Solution1(pRoot->m_pRight);
+//}
+////////////////////////////数组中数字出现的次数//////////////////////////////////////////////////////////////
+//unsigned int FindFirstBitIs1(int num);
+//bool IsBit1(int num, unsigned int indexBit);
+//
+//void FindNumsAppearOnce(int data[], int length, int* num1, int* num2)
+//{
+//    if(data == nullptr || length < 2)
+//        return;
+//
+//    int resultExclusiveOR = 0;
+//    for(int i = 0; i < length; ++i)
+//        resultExclusiveOR ^= data[i];
+//
+//    unsigned int indexOf1 = FindFirstBitIs1(resultExclusiveOR);
+//
+//    *num1 = *num2 = 0;
+//    for(int j = 0; j < length; ++j)
+//    {
+//        if(IsBit1(data[j], indexOf1))
+//            *num1 ^= data[j];
+//        else
+//            *num2 ^= data[j];
+//    }
+//}
+//
+//unsigned int FindFirstBitIs1(int num)
+//{
+//    int indexBit = 0;
+//    while(((num & 1) == 0) && (indexBit < 8 * sizeof(int)))
+//    {
+//        num = num >> 1;
+//        ++indexBit;
+//    }
+//
+//    return indexBit;
+//}
+//
+//bool IsBit1(int num, unsigned int indexBit)
+//{
+//    num = num >> indexBit;
+//    return (num & 1);
+//}
+//
+//
+//void Test(const char* testName, int data[], int length, int expected1, int expected2)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    int result1, result2;
+//    FindNumsAppearOnce(data, length, &result1, &result2);
+//
+//    if((expected1 == result1 && expected2 == result2) ||
+//       (expected2 == result1 && expected1 == result2))
+//        printf("Passed.\n\n");
+//    else
+//        printf("Failed.\n\n");
+//}
+//
+//void Test1()
+//{
+//    int data[] = { 2, 4, 3, 6, 3, 2, 5, 5 };
+//    Test("Test1", data, sizeof(data) / sizeof(int), 4, 6);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+///////////////////////////////////和为S的数字//////////////////////////////////////////////////////////////////////////
+//bool FindNumbersWithSum(int data[], int length, int sum,
+//                        int* num1, int* num2)
+//{
+//    bool found = false;
+//    if(length < 1 || num1 == nullptr || num2 == nullptr)
+//        return found;
+//
+//    int ahead = length - 1;
+//    int behind = 0;
+//
+//    while(ahead > behind)
+//    {
+//        long long curSum = data[ahead] + data[behind];
+//
+//        if(curSum == sum)
+//        {
+//            *num1 = data[behind];
+//            *num2 = data[ahead];
+//            found = true;
+//            break;
+//        }
+//        else if(curSum > sum)
+//            ahead --;
+//        else
+//            behind ++;
+//    }
+//
+//    return found;
+//}
+//void Test(const char* testName, int data[], int length, int sum, bool expectedReturn)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    int num1, num2;
+//    int result = FindNumbersWithSum(data, length, sum, &num1, &num2);
+//    if(result == expectedReturn)
+//    {
+//        if(result)
+//        {
+//            if(num1 + num2 == sum)
+//                printf("Passed. \n");
+//            else
+//                printf("FAILED. \n");
+//        }
+//        else
+//            printf("Passed. \n");
+//    }
+//    else
+//        printf("FAILED. \n");
+//}
+//
+//
+//void Test1()
+//{
+//    int data[] = {1, 2, 4, 7, 11, 15};
+//    Test("Test1", data, sizeof(data) / sizeof(int), 15, true);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+///////////////////////////////////翻转字符串,大字符串中的小字符串不用翻转//////////////////////////////////////////////////////////////////////////////////
+
+//char* ReverseSentence(char *pData)
+//{
+//    if(pData == nullptr)
+//        return nullptr;
+//
+//    char *pBegin = pData;
+//
+//    char *pEnd = pData;
+//    while(*pEnd != '\0')
+//        pEnd ++;
+//    pEnd--;
+//
+//    // ·­×ªÕû¸ö¾ä×Ó
+//    Reverse(pBegin, pEnd);
+//
+//    // ·­×ª¾ä×ÓÖÐµÄÃ¿¸öµ¥´Ê
+//    pBegin = pEnd = pData;
+//    while(*pBegin != '\0')
+//    {
+//        if(*pBegin == ' ')
+//        {
+//            pBegin ++;
+//            pEnd ++;
+//        }
+//        else if(*pEnd == ' ' || *pEnd == '\0')
+//        {
+//            Reverse(pBegin, --pEnd);
+//            pBegin = ++pEnd;
+//        }
+//        else
+//            pEnd ++;
+//    }
+//
+//    return pData;
+//}
+//
+//void Test(const char* testName, char* input, const char* expectedResult)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    ReverseSentence(input);
+//
+//    if((input == nullptr && expectedResult == nullptr)
+//       || (input != nullptr && strcmp(input, expectedResult) == 0))
+//        printf("Passed.\n\n");
+//    else
+//        printf("Failed.\n\n");
+//}
+//
+//
+//void Test1()
+//{
+//    char input[] = "I am a student.";
+//    char expected[] = "student. a am I";
+//
+//    Test("Test1", input, expected);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+////////////////////////////////////////////把前n个字符串翻转到后面去/////////////////////////////////////////////////////////////////////////
+//char* LeftRotateString(char* pStr, int n)
+//{
+//    if(pStr != nullptr)
+//    {
+//        int nLength = static_cast<int>(strlen(pStr));
+//        if(nLength > 0 && n > 0 && n < nLength)
+//        {
+//            char* pFirstStart = pStr;
+//            char* pFirstEnd = pStr + n - 1;
+//            char* pSecondStart = pStr + n;
+//            char* pSecondEnd = pStr + nLength - 1;
+//
+//
+//            Reverse(pFirstStart, pFirstEnd);
+//
+//            Reverse(pSecondStart, pSecondEnd);
+//
+//            Reverse(pFirstStart, pSecondEnd);
+//        }
+//    }
+//
+//    return pStr;
+//}
+//
+//
+//void Test(const char* testName, char* input, int num, const char* expectedResult)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    char* result = LeftRotateString(input, num);
+//
+//    if((input == nullptr && expectedResult == nullptr)
+//       || (input != nullptr && strcmp(result, expectedResult) == 0))
+//        printf("Passed.\n\n");
+//    else
+//        printf("Failed.\n\n");
+//}
+//
+//void Test1()
+//{
+//    char input[] = "abcdefg";
+//    char expected[] = "cdefgab";
+//
+//    Test("Test1", input, 2, expected);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//    return 0;
+//}
+/////////////////////////求n个筛子每一个点数和的概率//////////////////////////////////////////////////////////////////
+//int g_maxValue = 6;
+//
+//void Probability(int number, int* pProbabilities);
+//void Probability(int original, int current, int sum, int* pProbabilities);
+//
+//void PrintProbability_Solution1(int number)
+//{
+//    if(number < 1)
+//        return;
+//
+//    int maxSum = number * g_maxValue;
+//    int* pProbabilities = new int[maxSum - number + 1];
+//    for(int i = number; i <= maxSum; ++i)
+//        pProbabilities[i - number] = 0;
+//
+//    Probability(number, pProbabilities);
+//
+//    int total = pow((double)g_maxValue, number);
+//    for(int i = number; i <= maxSum; ++i)
+//    {
+//        double ratio = (double)pProbabilities[i - number] / total;
+//        printf("%d: %e\n", i, ratio);
+//    }
+//
+//    delete[] pProbabilities;
+//}
+//void Probability(int number, int* pProbabilities)
+//{
+//    for(int i = 1; i <= g_maxValue; ++i)
+//        Probability(number, number, i, pProbabilities);
+//}
+//
+//void Probability(int original, int current, int sum,
+//                 int* pProbabilities)
+//{
+//    if(current == 1)
+//    {
+//        pProbabilities[sum - original]++;
+//    }
+//    else
+//    {
+//        for(int i = 1; i <= g_maxValue; ++i)
+//        {
+//            Probability(original, current - 1, i + sum, pProbabilities);
+//        }
+//    }
+//}
+//void PrintProbability_Solution2(int number)
+//{
+//    if(number < 1)
+//        return;
+//
+//    int* pProbabilities[2];
+//    pProbabilities[0] = new int[g_maxValue * number + 1];
+//    pProbabilities[1] = new int[g_maxValue * number + 1];
+//    for(int i = 0; i < g_maxValue * number + 1; ++i)
+//    {
+//        pProbabilities[0][i] = 0;
+//        pProbabilities[1][i] = 0;
+//    }
+//
+//    int flag = 0;
+//    for (int i = 1; i <= g_maxValue; ++i)
+//        pProbabilities[flag][i] = 1;
+//
+//    for (int k = 2; k <= number; ++k)
+//    {
+//        for(int i = 0; i < k; ++i)
+//            pProbabilities[1 - flag][i] = 0;
+//
+//        for (int i = k; i <= g_maxValue * k; ++i)
+//        {
+//            pProbabilities[1 - flag][i] = 0;
+//            for(int j = 1; j <= i && j <= g_maxValue; ++j)
+//                pProbabilities[1 - flag][i] += pProbabilities[flag][i - j];
+//        }
+//
+//        flag = 1 - flag;
+//    }
+//
+//    double total = pow((double)g_maxValue, number);
+//    for(int i = number; i <= g_maxValue * number; ++i)
+//    {
+//        double ratio = (double)pProbabilities[flag][i] / total;
+//        printf("%d: %e\n", i, ratio);
+//    }
+//
+//delete[] pProbabilities[0];
+//delete[] pProbabilities[1];
+//}
+//void Test(int n)
+//{
+//    printf("Test for %d begins:\n", n);
+//
+//    printf("Test for solution1\n");
+//    PrintProbability_Solution1(n);
+//
+//    printf("Test for solution2\n");
+//    PrintProbability_Solution2(n);
+//
+//    printf("\n");
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//    Test(1);
+//    Test(2);
+//    Test(3);
+//    Test(4);
+//
+//    Test(11);
+//
+//    Test(0);
+//
+//    return 0;
+//}
+//////////////////////////////////判断5张扑克牌是不是顺子/////////////////////////////////////////////////////////////////////////
+//int Compare(const void *arg1, const void *arg2);
+//
+//bool IsContinuous(int* numbers, int length)
+//{
+//    if(numbers == nullptr || length < 1)
+//        return false;
+//
+//    qsort(numbers, length, sizeof(int), Compare);
+//
+//    int numberOfZero = 0;
+//    int numberOfGap = 0;
+//
+//
+//    for(int i = 0; i < length && numbers[i] == 0; ++i)
+//        ++numberOfZero;
+//
+//
+//    int small = numberOfZero;
+//    int big = small + 1;
+//    while(big < length)
+//    {
+//
+//        if(numbers[small] == numbers[big])
+//            return false;
+//
+//        numberOfGap += numbers[big] - numbers[small] - 1;
+//        small = big;
+//        ++big;
+//    }
+//
+//    return (numberOfGap > numberOfZero) ? false : true;
+//}
+//int Compare(const void *arg1, const void *arg2)
+//{
+//    return *(int*) arg1 - *(int*) arg2;
+//}
+//
+//
+//void Test(const char* testName, int* numbers, int length, bool expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    if(IsContinuous(numbers, length) == expected)
+//        printf("Passed.\n");
+//    else
+//        printf("Failed.\n");
+//}
+//
+//void Test1()
+//{
+//    int numbers[] = { 1, 3, 2, 5, 4 };
+//    Test("Test1", numbers, sizeof(numbers) / sizeof(int), true);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+/////////////////////////////n个数排成一个圆，每次删除第m个数，问最后剩下的那个数////////////////////////////////////////////
+//int LastRemaining_Solution1(unsigned int n, unsigned int m)
+//{
+//    if(n < 1 || m < 1)
+//        return -1;
+//
+//    unsigned int i = 0;
+//
+//    list<int> numbers;
+//    for(i = 0; i < n; ++ i)
+//        numbers.push_back(i);
+//
+//    list<int>::iterator current = numbers.begin();
+//    while(numbers.size() > 1)
+//    {
+//        for(int i = 1; i < m; ++ i)
+//        {
+//            current ++;
+//            if(current == numbers.end())
+//                current = numbers.begin();
+//        }
+//
+//        list<int>::iterator next = ++ current;
+//        if(next == numbers.end())
+//            next = numbers.begin();
+//
+//        -- current;
+//        numbers.erase(current);
+//        current = next;
+//    }
+//
+//    return *(current);
+//}
+//
+//int LastRemaining_Solution2(unsigned int n, unsigned int m)
+//{
+//    if(n < 1 || m < 1)
+//        return -1;
+//
+//    int last = 0;
+//    for (int i = 2; i <= n; i ++)
+//        last = (last + m) % i;
+//
+//    return last;
+//}
+//
+//
+//void Test(const char* testName, unsigned int n, unsigned int m, int expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: \n", testName);
+//
+//    if(LastRemaining_Solution1(n, m) == expected)
+//        printf("Solution1 passed.\n");
+//    else
+//        printf("Solution1 failed.\n");
+//
+//    if(LastRemaining_Solution2(n, m) == expected)
+//        printf("Solution2 passed.\n");
+//    else
+//        printf("Solution2 failed.\n");
+//
+//    printf("\n");
+//}
+//
+//void Test1()
+//{
+//    Test("Test1", 5, 3, 3);
+//}
+//int main(int argc, char* argv[])
+//{
+//    Test1();
+//
+//    return 0;
+//}
+///////////////////////////////////股票的最大利润///////////////////////////////////////////////////////////////
+//int MaxDiff(const int* numbers, unsigned length)
+//{
+//    if(numbers == nullptr && length < 2)
+//        return 0;
+//
+//    int min = numbers[0];
+//    int maxDiff = numbers[1] - min;
+//
+//    for(int i = 2; i < length; ++i)
+//    {
+//        if(numbers[i - 1] < min)
+//            min = numbers[i - 1];
+//
+//        int currentDiff = numbers[i] - min;
+//        if(currentDiff > maxDiff)
+//            maxDiff = currentDiff;
+//    }
+//
+//    return maxDiff;
+//}
+//
+//void Test(const char* testName, const int* numbers, unsigned int length, int expected)
+//{
+//    if(testName != nullptr)
+//        printf("%s begins: ", testName);
+//
+//    if(MaxDiff(numbers, length) == expected)
+//        printf("Passed.\n");
+//    else
+//        printf("FAILED.\n");
+//}
+//
+//void Test1()
+//{
+//    int numbers[] = { 4, 1, 3, 2, 5 };
+//    Test("Test1", numbers, sizeof(numbers) / sizeof(int), 4);
+//}
+//
+//int main(int argc, char* argv[]) {
+//    Test1();
+//
+//    return 0;
+//}
+///////////////////////////////////根据前序和中序重构二叉树//////////////////////////////////////////////////////////////////////
+
+//
+//        Definition for binary tree
+//* struct TreeNode {
+//    *     int val;
+//    *     TreeNode *left;
+//    *     TreeNode *right;
+//    *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+//    * };
+//*/
+//class Solution {
+//public:
+//    struct TreeNode* reConstructBinaryTree(vector<int> pre,vector<int> in) {
+//        //判定递归终止条件；
+//        if(pre.size() == 0 || in.size() == 0) {
+//            return NULL;
+//        }
+//        //定义Node节点并其求根节点；
+//        int root = pre[0];
+//        TreeNode* node = new TreeNode(root);
+//        vector<int>::iterator it;
+//        //1.求左右子树的遍历序列；
+//        vector<int> preLeft, preRight, inLeft, inRight;
+//        //（1）.求根节点在中序遍历序列中的位置；
+//        vector<int>::iterator i;
+//        for(it = in.begin(); it != in.end(); it++) {
+//            if(root == *it) {
+//                i = it;
+//            }
+//        }
+//        //（2）.求左右子树的中序遍历子序列；
+//        int k = 0;
+//        for(it = in.begin(); it != in.end(); it++) {
+//            if(k == 0) {
+//                inLeft.push_back(*it);
+//            }
+//            else if(k == 1) {
+//                inRight.push_back(*it);
+//            }
+//            else {}
+//            if(it == i) {
+//                k = 1;
+//            }
+//        }
+//        //（3）.求左右子树的前序遍历子序列；
+//        k = 0;
+//        vector<int>::iterator ite;
+//        for(it = pre.begin()+1; it != pre.end(); it++) {
+//            for(ite = inLeft.begin(); ite != inLeft.end(); ite++) {
+//                if(*it == *ite) {
+//                    preLeft.push_back(*it);
+//                    k = 1;
+//                }
+//            }
+//            if(k == 0) {
+//                preRight.push_back(*it);
+//            }
+//            k = 0;
+//        }
+//        //根据遍历序列求出跟的左右节点；
+//        node->left = reConstructBinaryTree(preLeft,inLeft);
+//        node->right = reConstructBinaryTree(preRight,inRight);
+//        //返回节点地址；
+//        return node;
+//    }
+//};
+//
+/////////////////////////////////////用两个站模仿队列///////////////////////////////////////////////////////////////
+//class Solution
+//{
+//public:
+//    void push(int node) {
+//        stack1.push(node);
+//
+//    }
+//
+//    int pop() {
+//        int a;
+//        if(stack2.empty()){
+//            while(!stack1.empty()){
+//                a=stack1.top();
+//                stack2.push(a);
+//                stack1.pop();
+//            }
+//        }
+//        a=stack2.top();
+//        stack2.pop();
+//        return a;
+//
+//    }
+//
+//private:
+//    stack<int> stack1;
+//    stack<int> stack2;
+//};
+/////////////////////////////////////在旋转数组中查找最小的数////////////////////////////////////////////////////////////
+
+//#include <iostream>
+//#include <vector>
+//#include <string>
+//#include <stack>
+//#include <algorithm>
+//using namespace std;
+//
+//class Solution {
+//public:
+//    int minNumberInRotateArray(vector<int> rotateArray) {
+//        int size = rotateArray.size();
+//        if(size == 0){
+//            return 0;
+//        }//if
+//        int left = 0,right = size - 1;
+//        int mid = 0;
+//        // rotateArray[left] >= rotateArray[right] 确保旋转
+//        while(rotateArray[left] >= rotateArray[right]){
+//            // 分界点
+//            if(right - left == 1){
+//                mid = right;
+//                break;
+//            }//if
+//            mid = left + (right - left) / 2;
+//            // rotateArray[left] rotateArray[right] rotateArray[mid]三者相等
+//            // 无法确定中间元素是属于前面还是后面的递增子数组
+//            // 只能顺序查找
+//            if(rotateArray[left] == rotateArray[right] && rotateArray[left] == rotateArray[mid]){
+//                return MinOrder(rotateArray,left,right);
+//            }//if
+//            // 中间元素位于前面的递增子数组
+//            // 此时最小元素位于中间元素的后面
+//            if(rotateArray[mid] >= rotateArray[left]){
+//                left = mid;
+//            }//if
+//                // 中间元素位于后面的递增子数组
+//                // 此时最小元素位于中间元素的前面
+//            else{
+//                right = mid;
+//            }//else
+//        }//while
+//        return rotateArray[mid];
+//    }
+//private:
+//    // 顺序寻找最小值
+//    int MinOrder(vector<int> &num,int left,int right){
+//        int result = num[left];
+//        for(int i = left + 1;i < right;++i){
+//            if(num[i] < result){
+//                result = num[i];
+//            }//if
+//        }//for
+//        return result;
+//    }
+//};
+//
+//int main(){
+//    Solution s;
+//    //vector<int> num = {0,1,2,3,4,5};
+//    //vector<int> num = {4,5,6,7,1,2,3};
+//    vector<int> num = {2,2,2,2,1,2};
+//    int result = s.minNumberInRotateArray(num);
+//    // 输出
+//    cout<<result<<endl;
+//    char b = 'a';
+//    cout << b + 1;
+//    return 0;
+//}
+//////////////////////////////输入一个链表，输出该链表的第k个节点///////////////////////////////////////////////////////////////////////
+//class Solution {
+//public:
+//    ListNode* FindKthToTail(ListNode* pListHead, unsigned int k) {
+//        if(pListHead == nullptr || k <= 0)
+//            return NULL;
+//        ListNode *p1 = pListHead, *p2 = pListHead;
+//        // p1 = pListHead;
+//        //p2 = pListHead;
+//        for(int i=1;i<k;++i){
+//            if(p2->next != NULL ){
+//                p2 = p2->next;
+//
+//            }
+//            else
+//                return NULL;
+//        }
+//        while(p2->next != NULL){
+//            p2 = p2->next;
+//            p1 = p1->next;
+//        }
+//        return p1;
+//
+//    }
+//};
+//////////////////////////////////////子序列和最大///////////////////////////////////////////////////////////////
+//int main(){
+//    vector<int> vec;
+//    int num;
+//    while(cin>>num){
+//        vec.push_back(num);
+//        if(cin.get() == '\n')
+//            break;
+//    }
+//    int res=INT_MIN,cur=0;
+//    for(int i=0;i<vec.size();++i){
+//        cur=max(cur+vec[i],vec[i]); //进行当前位置是否连续的讨论
+//        res=max(res,cur);
+//    }
+//    cout<<res;
+//    return 0;
+//}
+/////////////////////////////////////////////输出第k大数//////////////////////////////////////////////////////////////////
+//int main() {
+//    vector<int> vec;
+//    int num , k;
+//
+//    while (cin >> num) {
+//        vec.push_back(num);
+//        if(cin.get() == '\n')
+//            break;
+//    }
+//    while (cin >> k ){
+//
+//        if(cin.get() == '\n')
+//            break;
+//    }
+//
+//    priority_queue<int, vector<int>, greater<int>> pq; //因为要找第K大，那么我们就要维护一个小顶堆
+//    for (auto it:vec) {
+//        if (pq.size() < k) //未满，直接进入
+//            pq.push(it);
+//        else {
+//            if (it > pq.top()) {
+//                pq.pop();
+//                pq.push(it);
+//            }
+//        }
+//    }
+//    cout << pq.top();
+//    return 0;
+//}
+///////////////////////////////////第n个丑数////////////////////////////////////////////////////////////////////////////////////
+//int n,ans;
+//
+//int choushu(int x);
+//
+//int main()
+//{
+//    int i, n;
+//    while (cin >> n) {
+//
+//        if(cin.get() == '\n')
+//            break;
+//    }
+//    for(i=1;ans<n;ans+=choushu(i++)) ;
+//    cout << i - 1;
+//    return 0;
+//}
+//
+//int choushu(int x)
+//{
+//    while(!(x%2))
+//        x >>= 1;
+//    while(!(x%3))
+//        x /= 3;
+//    while(!(x%5))
+//        x /= 5;
+//    return x==1;
+//}
+///////////////////////////////////输出树的右视图//////////////////////////////////////////////////////
+//vector<int> rihgtView(TreeNode* root)
+//{
+//    if(root==NULL)
+//         return NULL;
+//    TreeNode* tree=root;
+//    vector<int> res;
+//    while(tree!=NULL)
+//   {
+//        if(tree->right!=NULL)
+//          {res.push(tree->rigth->val);
+//           tree=tree->right;}
+//        else
+//        {
+//           if(tree->left!=NULL)
+//           {res.push_back(tree->left->val);
+//            tree=tree->left;}
+//            else
+//               return res;
+//
+//        }
+//
+//        }
+//        }
+/////////////////////////////////////牛牛找工作/////////////////////////////////////////////////////////////////////
+//int main() {
+//    int n, m;
+//    while(cin >> n >> m) {
+//        vector<pair<int, int> > job(n + 1), guy(m);
+//        vector<int> map(m);
+//        int mx = 0, index = 0, left = 0;
+//        job[0] = make_pair(0, 0);
+//        for(int i = 1; i <= n; ++ i) {
+//            cin >> job[i].first >> job[i].second;
+//        }
+//        for(int i = 0; i < m; ++ i) {
+//            cin >> guy[i].first;
+//            guy[i].second = i;
+//        }
+//        sort(job.begin(), job.end(), [&](pair<int, int> a, pair<int, int> b){return a.first < b.first;});
+//        sort(guy.begin(), guy.end(), [&](pair<int, int> a, pair<int, int> b){return a.first < b.first;});
+//        for(int i = 0; i <= n; ++ i) {
+//            mx = max(mx, job[i].second);
+//            job[i].second = mx;
+//        }
+//        while(left < m && index < n + 1) {
+//            if(guy[left].first >= job[index].first) ++ index;
+//            else {
+//                map[guy[left].second] = job[index - 1].second;
+//                ++ left;
+//            }
+//        }
+//        for(int i = left; i < m; ++ i) {
+//            map[guy[i].second] = job[n].second;
+//        }
+//        for(int i = 0; i < m; ++ i) {
+//            cout << map[i] << endl;
+//        }
+//    }
+//}
+//////////////////////////////求被3整除的///////////////////////////////////////////////////////////////////////////////////
+//#include<bits/stdc++.h>
+//using namespace std;
+//typedef long long int ll;
+//
+//int main(){
+//    ll l , r;g个数
+//    while(cin >> l >> r){
+//        ll count = 0;
+//        for(int i = l; i <= r; i++){
+//            if((i+1)*i/2 % 3 == 0)    count++;
+//        }
+//        cout << count << endl;
+//    }
+//    return 0;
+//}
+///////////////////////////////路灯问题//////////////////////////////////////////////////////////////
+//int main()
+//{
+//    int t; cin >> t;
+//    for (int i = 0; i < t; i++) {
+//        int n; cin >> n;
+//        int j = 0, count = 0;
+//        while (j++ < n) {
+//            char ch; cin >> ch;
+//            if (ch == '.') {
+//                count++;
+//                if (j++ < n) cin >> ch;
+//                if (j++ < n) cin >> ch;
+//            }
+//        }
+//        cout << count << endl;
+//    }
+//    return 0;
+//}
+/////////////////////////////////////////////牛牛迷路了，如何去辨别方位///////////////////////////////////////////////////////
+//int main(){
+//    int n; cin >> n;
+//    int ans = 0;
+//    char dir[] = "NESW";
+//    string str; cin >> str;
+//    for(int i = 0; i < n; i++)
+//        ans = (ans + (str[i] == 'L' ? -1:1) + 4) % 4;
+//    cout << dir[ans%4] << endl;
+//    return 0;
+//}
+//////////////////////////////////x对y取余大于等于k/////////////////////////////////////////////////////////////////////////////////////
+//using namespace std;
+//int main()
+//{
+//    long long n,k;
+//    cin>>n>>k;
+//    long long cnt=0;
+//    //举个例子，假设 k=3,n=11
+//    //因为要求对y取余>=k 所以y从k+1开始 （如果y=k，那么取余最大才是k-1）
+//    //对于第一个y=4,来求有多少个x满足条件
+//    //      y       y        y
+//    //1 2 3 4 5 6 7 8 9 10 11
+//    //所以n被分成了两部分，一部分是1-(n/y)*y:1-8  另一部分：9-11 没被整除的部分
+//    //1-4 5-8 每一部分都有 （y-k)个取余>=k的数
+//    //9-11 则有 n%y-k+1 +1是因为序列n从1开始。
+//    if(k==0)cnt=n*n;
+//    else{
+//        for(long long y=k+1;y<=n;++y)
+//            cnt+=(n/y)*(y-k)+(n%y>=k?n%y-k+1:0);
+//    }
+//    cout<<cnt<<endl;
+//    return 0;
+//}
+//////////////////////////////////////丢牌的方法//////////////////////////////////////////////////////////////////////////
+//#include <iostream>
+//#include <queue>
+//
+//using namespace std;
+//
+//int main()
+//{
+//    int n, t;
+//    queue<int> queue1;
+//    cin >> n;
+//    while(n --)
+//    {
+//        cin >> t;
+//        for(int i = 0; i < t;i ++)
+//            queue1.push(i+1);
+//        while(!queue1.empty())
+//        {
+//            cout << queue1.front();
+//            queue1.pop();
+//            queue1.push(queue1.front());
+//            queue1.pop();
+//        }
+//        cout << endl;
+//    }
+//    return 0;
+//}
+/////////////////////////////////////////将字符串进行降序排序////////////////////////////////////////////////////////////////
+//#include <iostream>
+//#include <queue>
+//#include <cstring>
+//#include <vector>
+//#include <algorithm>
+//
+//using namespace std;
+//
+//bool cmp(const string &x,const string &y)
+//{
+//    return x < y;
+//}
+//int main(){
+//    int n;
+//    cin >> n;
+//    vector<string> s;
+//    string f;
+//    while( n --){
+//        cin >> f;
+//        s.push_back(f);
+//
+//    }
+//    sort(s.begin(),s.end(),cmp);
+//    for(int i = 0;i < s.size(); i++)
+//    {
+//        cout<<s[i]<<endl;
+//    }
+//    return 0;
+//
+//}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <iostream>
+#include <cmath>
+using namespace std;
+int main(){
+    int a, b;
+    cin >> a >> b;
+    return a + b;
 }
-void FindPath(BinaryTreeNode* pRoot,int expectedSum, std::vector<int>& path, int currentSum){
-    currentSum += pRoot->m_nValue;
-    path.push_back(pRoot->m_nValue);
-    bool isLeaf = pRoot->m_pLeft == nullptr && pRoot->m_pRight == nullptr;
-    if(currentSum == expectedSum && isLeaf){
-        cout << "A Path is found" << endl;
-        std::vector<int>::iterator iter = path.begin();
-        for(; iter != path.end(); ++ iter)
-            cout << *iter << " ";
-        cout << endl;
-    }
-    if(pRoot->m_pLeft != nullptr)
-        FindPath(pRoot->m_pLeft, expectedSum, path, currentSum);
-    if(pRoot->m_pRight != nullptr)
-        FindPath(pRoot->m_pRight, expectedSum, path, currentSum);
-    path.pop_back();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
